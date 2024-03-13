@@ -24,7 +24,6 @@
 #include <memory>
 
 #include "aidl/audio_aidl_interfaces.h"
-#include "osi/include/properties.h"
 
 namespace bluetooth {
 namespace audio {
@@ -34,12 +33,6 @@ using ::aidl::android::hardware::bluetooth::audio::
 
 static const std::string kDefaultAudioProviderFactoryInterface =
     std::string() + IBluetoothAudioProviderFactory::descriptor + "/default";
-static const std::string kSystemAudioProviderFactoryInterface =
-    std::string() + IBluetoothAudioProviderFactory::descriptor + "/sysbta";
-static inline const std::string audioProviderFactoryInterface() {
-  return osi_property_get_bool("persist.bluetooth.system_audio_hal.enabled", false)
-    ? kSystemAudioProviderFactoryInterface : kDefaultAudioProviderFactoryInterface;
-}
 
 std::unique_ptr<HalVersionManager> HalVersionManager::instance_ptr =
     std::make_unique<HalVersionManager>();
@@ -99,7 +92,7 @@ HalVersionManager::GetProvidersFactory_2_0() {
 
 HalVersionManager::HalVersionManager() {
   if (AServiceManager_checkService(
-          audioProviderFactoryInterface().c_str()) != nullptr) {
+          kDefaultAudioProviderFactoryInterface.c_str()) != nullptr) {
     hal_version_ = BluetoothAudioHalVersion::VERSION_AIDL_V1;
     return;
   }
